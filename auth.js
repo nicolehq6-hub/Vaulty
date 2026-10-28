@@ -121,7 +121,9 @@
     event.currentTarget.setAttribute("aria-label", show ? "Hide password" : "Show password");
   });
   document.querySelector("#forgotPassword").addEventListener("click", () => {
-    message.textContent = "Password reset is not set up yet. Contact the site administrator for help.";
+    const url = new URL("forgot-password.html", window.location.href);
+    if (fields.email.value.trim()) url.searchParams.set("email", fields.email.value.trim());
+    window.location.assign(url);
   });
   document.querySelector("#googleSignIn").addEventListener("click", async () => {
     if (!supabase) {
