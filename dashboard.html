@@ -784,7 +784,6 @@ document.addEventListener('keydown',function(e){
   if(!auth){location.replace('auth.html#signin');return}
   var sessionResult;
   try{
-    await auth.auth.initialize();
     sessionResult=await auth.auth.getSession()
   }
   catch(error){

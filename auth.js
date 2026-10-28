@@ -221,7 +221,7 @@
         if (event === "SIGNED_IN" && session) redirectToDashboard();
       });
     }
-    supabase.auth.initialize().then(() => supabase.auth.getSession()).then(({ data, error }) => {
+    supabase.auth.getSession().then(({ data, error }) => {
       if (error) {
         showAuthError(error, "We could not verify your sign-in session.");
       } else if (data.session) {
