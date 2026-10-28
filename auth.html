@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Sign in or create your private Vaultly account." />
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("vaultly-theme")==="dark"?"dark":"light"}catch(error){}</script>
+  <title>Vaultly | Sign in</title>
+  <link rel="icon" type="image/png" href="vaultly-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="auth.css" />
+  <link rel="stylesheet" href="theme.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+</head>
+<body>
+  <div class="auth-background" aria-hidden="true">
+    <video src="backvid.mp4" autoplay muted loop playsinline></video>
+  </div>
+  <header class="auth-header">
+    <a class="auth-brand" href="index.html">
+      <img class="auth-logo" src="vaultly-logo.png" alt="" />
+      Vaultly
+    </a>
+    <a class="back-link" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Back to home
+    </a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+      <span class="theme-label">Dark mode</span>
+    </button>
+  </header>
+
+  <main class="auth-main">
+    <section class="auth-copy" aria-labelledby="auth-headline">
+      <p class="eyebrow"><span></span> Personal vault</p>
+      <h1 id="auth-headline">Welcome<br /><em>back home.</em></h1>
+      <p class="lead" id="auth-lead">Sign in to open the photos and videos you keep close. Everything stays private by default.</p>
+      <p class="private-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        Private by default
+      </p>
+      <div class="mini-cards" aria-label="Vault highlights">
+        <div class="mini-card">
+          <span class="mini-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </span>
+          <span><small>Total media</small><b>1,284</b></span>
+        </div>
+        <div class="mini-card">
+          <span class="mini-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+          </span>
+          <span><small>Shared link</small><b>Expires in 7 days</b></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card" id="authCard" aria-labelledby="formTitle">
+      <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="mode-tabs" id="modeTabs" role="tablist" aria-label="Account options">
+        <span class="tab-pill" aria-hidden="true"></span>
+        <button type="button" class="active" id="signinTab" role="tab" aria-selected="true" aria-controls="authForm" data-mode="signin">Sign in</button>
+        <button type="button" id="signupTab" role="tab" aria-selected="false" aria-controls="authForm" data-mode="signup">Create account</button>
+      </div>
+      <h2 id="formTitle">Sign in</h2>
+      <p class="form-subtitle" id="formSubtitle">Good to see you again.</p>
+
+      <form id="authForm" novalidate>
+        <label class="signup-only" for="fullName">Full name
+          <input id="fullName" name="name" type="text" autocomplete="name" placeholder="Your name" />
+          <span class="field-error" data-error="name">Please enter your name.</span>
+        </label>
+        <label for="email">Email
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+          <span class="field-error" data-error="email">Enter a valid email address.</span>
+        </label>
+        <label for="password">Password
+          <span class="password-field">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="At least 8 characters" required />
+            <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </span>
+          <span class="field-error" data-error="password">Password must be at least 8 characters.</span>
+        </label>
+        <label class="signup-only" for="confirmPassword">Confirm password
+          <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat your password" />
+          <span class="field-error" data-error="confirmPassword">Passwords don't match.</span>
+        </label>
+
+        <div class="form-row signin-only">
+          <label class="checkbox-label"><input id="remember" type="checkbox" /> Remember me</label>
+          <button type="button" class="text-link" id="forgotPassword">Forgot password?</button>
+        </div>
+        <div class="form-row signup-only">
+          <label class="checkbox-label"><input id="terms" type="checkbox" /> I agree to the <a class="text-link" href="index.html#privacy">Terms and Privacy</a></label>
+        </div>
+        <span class="field-error terms-error" data-error="terms">Please accept the terms to continue.</span>
+
+        <button class="submit-button" type="submit"><span id="submitText">Sign in</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+
+      <div class="divider"><span>or</span></div>
+      <button class="google-button" type="button" id="googleSignIn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2.1-1.9 3.3-4.7 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.4-1 7.2-2.7l-3.5-2.7c-1 .7-2.2 1-3.7 1-2.8 0-5.2-1.9-6-4.5H2.4v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M6 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.4a11 11 0 0 0 0 9.8L6 14.1z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.1 1.6l3.1-3.1A11 11 0 0 0 2.4 7.1L6 9.9c.8-2.6 3.2-4.5 6-4.5z"/></svg>
+        Continue with Google
+      </button>
+      <p class="mode-switch"><span id="switchPrompt">New to Vaultly?</span> <button type="button" id="switchMode">Create an account</button></p>
+      <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+</body>
+</html>

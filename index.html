@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaultly — Your memories, in one place</title>
+  <meta name="description" content="A calm, private home for the photos and videos you want to keep close." />
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("vaultly-theme")==="dark"?"dark":"light"}catch(error){}</script>
+  <link rel="icon" type="image/png" href="vaultly-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+  <div class="video-backdrop" id="videoBackdrop" aria-hidden="true">
+    <video class="background-video" src="Selfie.mp4" autoplay muted loop playsinline></video>
+    <div class="video-shade"></div>
+    <!-- Ambient layers -->
+    <canvas id="particles"></canvas>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- Navigation -->
+  <header class="nav" id="nav">
+    <a href="#top" class="brand">
+      <img class="brand-mark" src="vaultly-logo.png" alt="" />
+      Vaultly
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#collections">Collections</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+        <span class="theme-label">Dark mode</span>
+      </button>
+      <a href="auth.html#signin" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="auth.html#signup" class="btn btn-primary btn-sm magnetic">Get started</a>
+      <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow reveal"><span class="dot"></span> Personal vault <span class="sep"></span> <span id="today">Oct 25, 2026</span></p>
+        <h1 class="hero-title">
+          <span class="line"><span class="word">Your</span> <span class="word">memories,</span></span>
+          <span class="line accent">
+            <span class="rotator" id="rotator">
+              <span class="rot-item active">in one place.</span>
+              <span class="rot-item">kept close.</span>
+              <span class="rot-item">safe &amp; sound.</span>
+              <span class="rot-item">yours alone.</span>
+            </span>
+          </span>
+        </h1>
+        <p class="hero-sub reveal" style="--d:.4s">A calm home for the photos and videos you want to keep close.</p>
+        <p class="private-tag reveal" style="--d:.5s">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          Private by default
+        </p>
+        <div class="hero-cta reveal" style="--d:.6s">
+          <a href="#privacy" class="btn btn-dark magnetic">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+            Share vault
+          </a>
+          <a href="#cta" class="btn btn-primary btn-glow magnetic">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+            Upload media
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual" id="heroVisual">
+        <div class="vault-window float-layer" data-depth="10">
+          <div class="vw-bar"><i></i><i></i><i></i><span>All media</span></div>
+          <div class="vw-grid">
+            <!-- Replace the src paths below with your own photos -->
+            <div class="ph p1"><img src="images.jpg" alt="" onerror="this.remove()"></div>
+            <div class="ph p2"><video src="Selfie.mp4" poster="Travel img.png" muted loop autoplay playsinline></video><span class="play"></span></div>
+            <div class="ph p3"><img src="Celebrate.png" alt="" onerror="this.remove()"></div>
+            <div class="ph p4"><img src="japan.png" alt="" onerror="this.remove()"></div>
+            <div class="ph p5"><img src="selfie2.png" alt="" onerror="this.remove()"></div>
+            <div class="ph p6"><video src="Selfie.mp4" poster="selfie.png" muted loop autoplay playsinline></video><span class="play"></span></div>
+          </div>
+        </div>
+        <div class="float-layer" data-depth="26" style="top:6%;right:-2%">
+          <div class="chip-card bob" style="--bd:0s">
+            <span class="chip-ico violet"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span>
+            <div><small>Total media</small><b data-count="1284">0</b></div>
+            <em>+18%</em>
+          </div>
+        </div>
+        <div class="float-layer" data-depth="38" style="bottom:12%;left:-6%">
+          <div class="chip-card bob" style="--bd:-2s">
+            <span class="chip-ico teal"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9l5 3-5 3z"/></svg></span>
+            <div><small>New video</small><b>Beach day.mp4</b></div>
+          </div>
+        </div>
+        <div class="float-layer" data-depth="18" style="bottom:-4%;right:8%">
+          <div class="chip-card bob" style="--bd:-4s">
+            <span class="chip-ico rose"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>
+            <div><small>Shared link</small><b>Expires in 7 days</b></div>
+          </div>
+        </div>
+      </div>
+      <a href="#stats" class="scroll-hint" aria-label="Scroll down"><span></span></a>
+    </section>
+
+    <!-- MARQUEE -->
+    <section class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Family trips</span><span>Birthdays</span><span>Weddings</span><span>Pets</span><span>Road trips</span><span>Graduations</span><span>Sunsets</span><span>Holidays</span><span>Throwbacks</span>
+        <span>Family trips</span><span>Birthdays</span><span>Weddings</span><span>Pets</span><span>Road trips</span><span>Graduations</span><span>Sunsets</span><span>Holidays</span><span>Throwbacks</span>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats" id="stats">
+      <article class="stat tilt reveal">
+        <span class="stat-ico violet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span>
+        <div class="stat-body"><small>Total media</small><b data-count="1284">0</b></div>
+        <div class="stat-side"><strong>+18%</strong><span>this month</span></div>
+      </article>
+      <article class="stat tilt reveal" style="--d:.1s">
+        <span class="stat-ico amber"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><circle cx="11" cy="14" r="2"/></svg></span>
+        <div class="stat-body"><small>Photos</small><b data-count="842">0</b></div>
+        <div class="stat-side mono">65.6%</div>
+      </article>
+      <article class="stat tilt reveal" style="--d:.2s">
+        <span class="stat-ico teal"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M10 12l4 2.5-4 2.5z"/></svg></span>
+        <div class="stat-body"><small>Videos</small><b data-count="442">0</b></div>
+        <div class="stat-side mono">34.4%</div>
+      </article>
+      <article class="stat tilt reveal" style="--d:.3s">
+        <span class="stat-ico rose"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>
+        <div class="stat-body"><small>Shared links</small><b data-count="18">0</b></div>
+        <div class="stat-side mono active-tag">Active</div>
+      </article>
+    </section>
+
+    <!-- COLLECTIONS -->
+    <section class="section" id="collections">
+      <div class="section-head reveal">
+        <p class="kicker">Organize your way</p>
+        <h2>Quick collections</h2>
+        <a href="#" class="view-all">View all <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="collections">
+        <a href="#" class="coll tilt reveal"><div class="coll-img c1"><img src="heart.png" alt="Friends making heart shapes with their hands" onerror="this.remove()"></div><div class="coll-info"><b>Family</b><span>238 items</span></div></a>
+        <a href="#" class="coll tilt reveal" style="--d:.08s"><div class="coll-img c2"><img src="pics.png" alt="Friends taking an outdoor group photo" onerror="this.remove()"></div><div class="coll-info"><b>Travel</b><span>412 items</span></div></a>
+        <a href="#" class="coll tilt reveal" style="--d:.16s"><div class="coll-img c3"><img src="imgg.png" alt="Friends sharing a celebration together" onerror="this.remove()"></div><div class="coll-info"><b>Celebrations</b><span>156 items</span></div></a>
+        <a href="#" class="coll tilt reveal" style="--d:.24s"><div class="coll-img c4"><img src="groupies.png" alt="A friend capturing a moment on her phone" onerror="this.remove()"></div><div class="coll-info"><b>Everyday</b><span>478 items</span></div></a>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section" id="features">
+      <div class="section-head reveal">
+        <p class="kicker">Why Vaultly</p>
+        <h2>Everything you keep, <span class="grad">beautifully kept.</span></h2>
+      </div>
+      <div class="bento">
+        <article class="bento-card big tilt reveal">
+          <div class="bento-text">
+            <h3>Upload once, find it forever</h3>
+            <p>Drag in hundreds of photos and videos. Vaultly sorts them by date and moment, so the right memory is always a search away.</p>
+          </div>
+          <div class="upload-demo">
+            <div class="drop"><span class="drop-ico">↑</span><small>Drop files here</small></div>
+            <div class="file-row"><i class="ph p2"></i><span>IMG_2041.jpg</span><div class="bar"><u></u></div></div>
+            <div class="file-row"><i class="ph p5"></i><span>Sunset.mp4</span><div class="bar"><u style="--w:72%"></u></div></div>
+            <div class="file-row"><i class="ph p3"></i><span>Birthday.jpg</span><div class="bar"><u style="--w:90%"></u></div></div>
+          </div>
+        </article>
+        <article class="bento-card tilt reveal" style="--d:.1s">
+          <span class="stat-ico violet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+          <h3>Instant search</h3>
+          <p>Press <kbd>⌘</kbd> <kbd>K</kbd> and jump to anything.</p>
+        </article>
+        <article class="bento-card tilt reveal" style="--d:.2s">
+          <span class="stat-ico teal"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+          <h3>Private by default</h3>
+          <p>Nothing is public until you decide it is.</p>
+        </article>
+        <article class="bento-card wide tilt reveal" style="--d:.1s">
+          <span class="stat-ico rose"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>
+          <h3>Share with a link, not a login</h3>
+          <p>Create expiring links for family and friends, and revoke them whenever you like.</p>
+        </article>
+      </div>
+      <div class="memory-strip reveal">
+        <div class="memory-strip-head">
+          <div>
+            <p class="kicker">A little inspiration</p>
+            <h3>Room for every kind of memory.</h3>
+          </div>
+          <div class="gallery-controls" aria-label="Photo gallery controls">
+            <button type="button" data-gallery-dir="-1" aria-label="Show previous photos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button" data-gallery-dir="1" aria-label="Show more photos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="memory-gallery" id="memoryGallery" tabindex="0" aria-label="Photo memories">
+          <figure class="memory-card"><img src="Brown Jacket and Blue Wide-Leg Jeans Outfit.jpg" alt="An outfit photo saved as a memory" loading="lazy"><figcaption>Outfit notes</figcaption></figure>
+          <figure class="memory-card"><img src="digicam.png" alt="A camera ready to capture a moment" loading="lazy"><figcaption>Everyday moments</figcaption></figure>
+          <figure class="memory-card"><img src="Plaid Sweater Styles.jpg" alt="A cozy sweater inspiration photo" loading="lazy"><figcaption>Favorite finds</figcaption></figure>
+          <figure class="memory-card"><img src="im.png" alt="A personal photo saved in a collection" loading="lazy"><figcaption>Little things</figcaption></figure>
+          <figure class="memory-card"><img src="Rainy Day Outfit for Fall _ Fall Comfy Outfit Inspo.jpg" alt="A rainy-day outfit inspiration photo" loading="lazy"><figcaption>Rainy afternoons</figcaption></figure>
+        </div>
+        <p class="gallery-hint">Swipe or use the arrows to explore</p>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how">
+      <div class="section-head reveal">
+        <p class="kicker">Three simple steps</p>
+        <h2>From camera roll to calm.</h2>
+      </div>
+      <div class="steps">
+        <div class="steps-line"><u></u></div>
+        <article class="step reveal"><img class="step-photo" src="download.jpg" alt="A memory ready to add to your vault" loading="lazy"><span class="step-num">01</span><h3>Upload</h3><p>Add photos and videos from any device in a few taps.</p></article>
+        <article class="step reveal" style="--d:.15s"><img class="step-photo" src="download (1).jpg" alt="A saved moment ready to organize" loading="lazy"><span class="step-num">02</span><h3>Organize</h3><p>Group moments into collections that make sense to you.</p></article>
+        <article class="step reveal" style="--d:.3s"><img class="step-photo" src="download (2).jpg" alt="A photo chosen to share with someone" loading="lazy"><span class="step-num">03</span><h3>Share</h3><p>Send a private link to just the people who matter.</p></article>
+      </div>
+    </section>
+
+    <!-- PRIVACY DEMO -->
+    <section class="section privacy" id="privacy">
+      <div class="privacy-copy reveal">
+        <p class="kicker">You hold the key</p>
+        <h2>Private first. <span class="grad">Shared on your terms.</span></h2>
+        <p>Flip the switch to see how a single link works. Turn it off and it stops instantly.</p>
+        <label class="switch-row">
+          <input type="checkbox" id="shareToggle" aria-label="Turn private link sharing on or off" />
+          <span class="switch"><i></i></span>
+          <span id="shareLabel">Sharing is off</span>
+        </label>
+      </div>
+      <div class="privacy-card reveal" id="privacyCard" style="--d:.15s">
+        <div class="lock" id="lockIcon">
+          <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="3"/><path class="shackle" d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        </div>
+        <p class="status" id="statusText" aria-live="polite">Only you can see this vault</p>
+        <div class="link-box" id="linkBox"><span id="linkText">vaultly.app/s/x7Kq-29</span><button id="copyBtn" type="button">Copy</button></div>
+        <p class="privacy-hint" id="privacyHint">Your photos stay private until you choose to share.</p>
+        <div class="privacy-moments" aria-label="Private photo previews">
+          <img src="%23BossBabeAesthetic%20%23PowerfulWoman%20%23WarriorVibes%20%23UnapologeticFeminine%20%23ConfidentAesthetic%20%23RebelChic%20%23FierceAndFeminine%20%23NoApologies%20%23QueenEnergy%20%23SheroAesthetic%20%23WomanAesthetic%20%23SoftGirlVibes%20%23Y2KWoman%20%20%23DarkAcad.jpg" alt="A personal photo in a private vault" loading="lazy" />
+          <img src="download (3).jpg" alt="A saved photo preview in a private vault" loading="lazy" />
+          <img src="Roasted Soy, Balsamic, &amp; Mustard Beef Tri-Tip —___.jpg" alt="A meal photo saved in a private vault" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="section">
+      <div class="section-head reveal"><p class="kicker">Kind words</p><h2>People keep it close.</h2></div>
+      <div class="quotes">
+        <blockquote class="tilt reveal"><p>“Finally, one calm place for every trip and birthday. It feels like opening a photo album.”</p><footer><span class="avatar">MR</span> Maya R.</footer></blockquote>
+        <blockquote class="tilt reveal" style="--d:.1s"><p>“Sharing with my parents takes one link. They never had to make an account.”</p><footer><span class="avatar">JT</span> Jordan T.</footer></blockquote>
+        <blockquote class="tilt reveal" style="--d:.2s"><p>“Private by default is the reason I switched. I sleep better knowing it.”</p><footer><span class="avatar">AS</span> Alex S.</footer></blockquote>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta reveal" id="cta">
+      <div class="cta-glow"></div>
+      <h2>Start your vault <span class="grad">today.</span></h2>
+      <p>Free to start. Your memories stay yours.</p>
+      <a class="btn btn-primary btn-glow magnetic" href="auth.html#signup">Create my vault</a>
+      <p class="form-note">Create an account to get started.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="brand small"><img class="brand-mark" src="vaultly-logo.png" alt="" />Vaultly</span>
+    <span class="mono">© 2026 Vaultly. All rights reserved.</span>
+    <nav><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></nav>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
