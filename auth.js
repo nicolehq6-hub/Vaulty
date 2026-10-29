@@ -3,6 +3,7 @@
   const tabs = document.querySelector("#modeTabs");
   const form = document.querySelector("#authForm");
   const message = document.querySelector("#authMessage");
+  const resendBtn = document.querySelector("#resendConfirm");
   const supabase = window.vaultlySupabase;
   const fields = {
     name: document.querySelector("#fullName"),
@@ -69,6 +70,42 @@
     message.classList.add("success");
     message.textContent = `Account created successfully! Please check ${email} for the confirmation link to activate your account. If you use Gmail, check your Gmail inbox. If you don't see the message, check your spam folder.`;
   };
+  const showResend = () => {
+    if (resendBtn) resendBtn.hidden = false;
+  };
+
+  if (resendBtn) {
+    resendBtn.addEventListener("click", async () => {
+      const email = fields.email.value.trim();
+      if (!email || !fields.email.validity.valid) {
+        message.classList.remove("success");
+        message.textContent = "Enter your email address first.";
+        return;
+      }
+      if (!supabase) {
+        showAuthError(null, window.vaultlySupabaseError || "Authentication is not configured.");
+        return;
+      }
+      resendBtn.disabled = true;
+      try {
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email,
+          options: { emailRedirectTo: new URL("auth.html", window.location.href).toString() },
+        });
+        if (error) {
+          showAuthError(error, "We could not resend the email. Please try again in a minute.");
+        } else {
+          message.classList.add("success");
+          message.textContent = `Confirmation email sent again to ${email}. Check your inbox and spam folder.`;
+        }
+      } catch (error) {
+        showAuthError(error, "We could not resend the email. Please try again in a minute.");
+      } finally {
+        setTimeout(() => { resendBtn.disabled = false; }, 60000);
+      }
+    });
+  }
 
   const clearErrors = () => {
     document.querySelectorAll(".field-error.show").forEach((error) => error.classList.remove("show"));
@@ -101,6 +138,7 @@
     document.querySelector("#switchPrompt").textContent = content.prompt;
     document.querySelector("#switchMode").textContent = content.switch;
     fields.password.autocomplete = mode === "signup" ? "new-password" : "current-password";
+    if (resendBtn) resendBtn.hidden = true;
     document.title = content.pageTitle;
     message.textContent = "";
     message.classList.remove("success");
@@ -158,7 +196,7 @@
     let invalid = false;
     if (mode === "signup") invalid = showError("name", !fields.name.value.trim()) || invalid;
     invalid = showError("email", !fields.email.validity.valid || !fields.email.value.trim()) || invalid;
-    invalid = showError("password", fields.password.value.length < 8) || invalid;
+    invalid = showError("password", fields.password.value.length < (mode === "signup" ? 8 : 1)) || invalid;
     if (mode === "signup") {
       invalid = showError("confirmPassword", fields.confirmPassword.value !== fields.password.value) || invalid;
       invalid = showError("terms", !fields.terms.checked) || invalid;
@@ -175,27 +213,24 @@
 
     setBusy(true);
     try {
+      const email = fields.email.value.trim();
+      const password = fields.password.value;
+
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
-          email: fields.email.value.trim(),
-          password: fields.password.value,
-          options: {
-            data: { full_name: fields.name.value.trim() },
-            emailRedirectTo: new URL("auth.html#signin", window.location.href).toString(),
-          },
+          email,
+          password,
+          options: { data: { full_name: fields.name.value.trim() } },
         });
         if (error) {
           showAuthError(error, "Your account could not be created.");
-        } else if (data.session && data.user && data.user.email_confirmed_at) {
+        } else if (data.session) {
           window.location.assign(dashboardUrl);
         } else {
-          showConfirmationNotice(fields.email.value.trim());
+          showAuthError(null, "Account created, but Supabase still requires email confirmation. Turn off 'Confirm email' in the dashboard.");
         }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: fields.email.value.trim(),
-          password: fields.password.value,
-        });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           showAuthError(error, "We could not sign you in. Check your email and password.");
         } else if (data.session) {

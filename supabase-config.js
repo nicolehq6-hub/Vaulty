@@ -9,7 +9,9 @@ window.VAULTLY_SUPABASE_CONFIG = {
   "use strict";
 
   var config = window.VAULTLY_SUPABASE_CONFIG;
-  if (!config.url || !config.anonKey) {
+  var SUPABASE_URL = config && config.url;
+  var SUPABASE_ANON_KEY = config && config.anonKey;
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     window.vaultlySupabase = null;
     window.vaultlySupabaseError = "Add your Supabase project URL and publishable anon key in supabase-config.js.";
     return;
@@ -22,7 +24,7 @@ window.VAULTLY_SUPABASE_CONFIG = {
   }
 
   try {
-    window.vaultlySupabase = window.supabase.createClient(config.url, config.anonKey, {
+    window.vaultlySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         autoRefreshToken: true,
         detectSessionInUrl: true,

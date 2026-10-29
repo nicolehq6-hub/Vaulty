@@ -88,6 +88,7 @@
   h1 em{font-style:normal;color:var(--sage)}
   .subline{color:var(--brown-soft);margin-top:10px;font-size:16px}
   .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .mobile-upload{display:none}
   .search{position:relative}
   .search .ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--brown-soft)}
   input.q,select.sort{
@@ -219,6 +220,11 @@
   .lb button.on .ic{fill:#E39A7B;color:#E39A7B}
   .lb-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 70px 28px;position:relative}
   .lb-stage img,.lb-stage video{max-width:100%;max-height:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);background:#000}
+  .video-viewer{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+  .video-viewer video{max-width:100%;max-height:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);background:#000}
+  .video-viewer:fullscreen{padding:24px;background:#000}
+  .video-viewer:fullscreen video{max-width:100%;max-height:100%;object-fit:contain}
+  .video-fullscreen{position:absolute;top:14px;right:14px;width:auto!important;padding:0 14px;font-size:14px;font-weight:600}
   .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px!important;height:48px!important;border-radius:50%!important}
   .lb-nav.l{left:14px}.lb-nav.r{right:14px}
 
@@ -235,6 +241,7 @@
     .scrim{position:fixed;inset:0;background:rgba(59,42,32,.35);z-index:40;display:none}
     .nav-open .scrim{display:block}
     .burger{display:grid}
+    .mobile-upload{display:flex}
     input.q{width:100%} .search{flex:1;min-width:150px}
     .tools{width:100%}
     .lb-stage{padding:0 12px 20px}
@@ -248,6 +255,7 @@
     .head{gap:14px;margin:14px 0 18px}
     .head h1{font-size:clamp(34px,10vw,44px)}
     .tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+    .mobile-upload{grid-column:1/-1;width:100%}
     .search{grid-column:1/-1;width:100%;min-width:0}
     input.q{width:100%;min-width:0}
     select.sort{min-width:0}
@@ -425,7 +433,7 @@ function dialog(o){
   return new Promise(function(res){
     var m=$('modal');
     m.innerHTML='<div class="mbox"><h3>'+esc(o.title)+'</h3>'+(o.desc?'<p>'+esc(o.desc)+'</p>':'')+
-      (o.input!=null?'<input id="mIn" type="text" maxlength="40" placeholder="'+esc(o.input)+'" value="'+esc(o.value||'')+'">':'')+
+      (o.input!=null?'<input id="mIn" type="text" maxlength="'+(o.maxlength||40)+'" placeholder="'+esc(o.input)+'" value="'+esc(o.value||'')+'">':'')+
       '<div class="mact"><button class="btn-ghost" data-r="0">Cancel</button><button class="btn-main'+(o.danger?' danger':'')+'" data-r="1">'+esc(o.ok||'OK')+'</button></div></div>';
     m.classList.add('show');
     var inp=$('mIn'); if(inp){inp.focus();inp.select()}
@@ -502,6 +510,21 @@ function moveItems(ids,fid){
   selected.clear(); render();
   toast('Moved '+ids.length+(ids.length>1?' items':' item')+' to '+(fid?folderById(fid).name:'Unsorted'));
 }
+async function renameMedia(id){
+  var m=media.filter(function(x){return x.id===id})[0]; if(!m) return false;
+  var name=await dialog({title:'Rename media',desc:'This name will appear in your vault and on downloads.',input:'File name',value:m.name,ok:'Save',maxlength:255});
+  if(!name||name===m.name) return false;
+  var oldName=m.name;
+  m.name=name;
+  if(!await dbPut('media',m)){
+    m.name=oldName;
+    toast('Could not save the new name. Please try again.');
+    return false;
+  }
+  render();
+  toast('Renamed');
+  return true;
+}
 async function deleteItems(ids){
   var ok=await dialog({title:ids.length>1?'Delete '+ids.length+' items?':'Delete this item?',desc:'This removes it from your vault in this browser. You can\'t undo this.',ok:'Delete',danger:true});
   if(!ok) return false;
@@ -559,6 +582,7 @@ function itemHTML(m){
     '<div class="cell">'+(f?esc(f.name):'Unsorted')+'</div><div class="cell">'+fmtSize(m.size)+'</div><div class="cell">'+fmtDate(m.added)+'</div>'+
     '<div class="acts">'+
       '<button data-act="fav" class="'+(m.fav?'on':'')+'" title="Favorite" aria-label="Favorite">'+ic('heart')+'</button>'+
+      '<button data-act="rename" title="Rename" aria-label="Rename">'+ic('edit')+'</button>'+
       '<button data-act="move" title="Move to folder" aria-label="Move">'+ic('move')+'</button>'+
       '<button data-act="dl" title="Download" aria-label="Download">'+ic('download')+'</button>'+
       '<button data-act="del" title="Delete" aria-label="Delete">'+ic('trash')+'</button>'+
@@ -577,6 +601,7 @@ function renderMain(){
     '</div><div class="tools">'+
       '<div class="search">'+ic('search')+'<input class="q" id="q" type="search" placeholder="Search by name" value="'+esc(q)+'"></div>'+
       '<select class="sort" id="sort"><option value="new">Newest</option><option value="old">Oldest</option><option value="name">Name</option><option value="size">Size</option></select>'+
+      '<button class="btn-main mobile-upload" data-a="upload">'+ic('upload')+'Upload media</button>'+
       '<div class="seg"><button data-layout="grid" class="'+(layout==='grid'?'active':'')+'" aria-label="Grid view">'+ic('grid')+'</button><button data-layout="list" class="'+(layout==='list'?'active':'')+'" aria-label="List view">'+ic('list')+'</button></div>'+
     '</div></div>';
 
@@ -637,6 +662,7 @@ async function newFolderFlow(){
 }
 
 document.addEventListener('click',async function(e){
+  if(Date.now()<suppressMediaClickUntil&&e.target.closest('.item')){e.preventDefault();return}
   var v=e.target.closest('[data-view]');
   if(v&&!e.target.closest('[data-act]')){setView(v.dataset.view);return}
 
@@ -679,6 +705,7 @@ document.addEventListener('click',async function(e){
     if(act){
       var ac=act.dataset.act;
       if(ac==='fav') toggleFav(id);
+      else if(ac==='rename') renameMedia(id);
       else if(ac==='dl') download(id);
       else if(ac==='del') deleteItems([id]);
       else if(ac==='move'){var f3=await pickFolder();if(f3!==undefined)moveItems([id],f3)}
@@ -720,7 +747,8 @@ window.addEventListener('dragleave',function(e){
 window.addEventListener('dragover',function(e){
   var tgt=e.target.closest&&e.target.closest('[data-drop]');
   document.querySelectorAll('.drop').forEach(function(x){if(x!==tgt)x.classList.remove('drop')});
-  if(tgt){e.preventDefault();tgt.classList.add('drop');$('veil').classList.remove('show')}
+  if(tgt&&dragIds.length){e.preventDefault();e.dataTransfer.dropEffect='move';tgt.classList.add('drop');$('veil').classList.remove('show')}
+  else if(tgt){e.preventDefault();tgt.classList.add('drop');$('veil').classList.remove('show')}
   else if(hasFiles(e)){e.preventDefault();$('veil').classList.add('show')}
 });
 window.addEventListener('drop',function(e){
@@ -731,10 +759,72 @@ window.addEventListener('drop',function(e){
     e.preventDefault();
     var fid=tgt?(tgt.dataset.drop||null):currentFolderId();
     addFiles(e.dataTransfer.files,fid);
-  } else if(tgt&&dragIds.length){
-    e.preventDefault(); moveItems(dragIds,tgt.dataset.drop||null);
+  } else {
+    var draggedId=e.dataTransfer.getData('text/x-vaultly');
+    if(draggedId&&!dragIds.length) dragIds=[draggedId];
+    if(tgt&&dragIds.length){
+      e.preventDefault();
+      moveItems(dragIds,tgt.dataset.drop||null);
+    }
   }
 });
+
+var touchDragTimer=null, touchDragItem=null, touchStartPoint=null, touchDropTarget=null;
+var touchDragging=false, suppressMediaClickUntil=0;
+document.addEventListener('touchstart',function(e){
+  var item=e.target.closest&&e.target.closest('.item');
+  if(!item||e.touches.length!==1||e.target.closest('button')) return;
+  clearTimeout(touchDragTimer);
+  touchDragItem=item;
+  touchStartPoint={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  touchDragging=false;
+  touchDragTimer=setTimeout(function(){
+    if(!touchDragItem) return;
+    var id=touchDragItem.dataset.id;
+    dragIds=selected.has(id)?Array.from(selected):[id];
+    touchDragging=true;
+    touchDragItem.classList.add('dragging');
+    toast('Drag onto a folder, or release to choose one');
+  },450);
+},{passive:true});
+document.addEventListener('touchmove',function(e){
+  if(!touchDragItem||e.touches.length!==1) return;
+  var touch=e.touches[0];
+  if(!touchDragging){
+    if(Math.hypot(touch.clientX-touchStartPoint.x,touch.clientY-touchStartPoint.y)>10){
+      clearTimeout(touchDragTimer);
+      touchDragItem=null;
+    }
+    return;
+  }
+  e.preventDefault();
+  var under=document.elementFromPoint(touch.clientX,touch.clientY);
+  var target=under&&under.closest('[data-drop]');
+  document.querySelectorAll('.drop').forEach(function(el){if(el!==target)el.classList.remove('drop')});
+  touchDropTarget=target;
+  if(target) target.classList.add('drop');
+},{passive:false});
+async function finishTouchDrag(chooseFolder){
+  clearTimeout(touchDragTimer);
+  if(touchDragging){
+    suppressMediaClickUntil=Date.now()+500;
+    if(touchDropTarget){
+      moveItems(dragIds,touchDropTarget.dataset.drop||null);
+    }else if(chooseFolder){
+      var ids=dragIds.slice();
+      var folderId=await pickFolder();
+      if(folderId!==undefined) moveItems(ids,folderId);
+    }
+  }
+  document.querySelectorAll('.dragging,.drop').forEach(function(el){el.classList.remove('dragging','drop')});
+  touchDragItem=null;
+  touchStartPoint=null;
+  touchDropTarget=null;
+  touchDragging=false;
+  dragIds=[];
+}
+document.addEventListener('touchend',function(){finishTouchDrag(true)},{passive:true});
+document.addEventListener('touchcancel',function(){finishTouchDrag(false)},{passive:true});
 
 /* ---------- lightbox ---------- */
 var lbList=[], lbIdx=-1;
@@ -746,22 +836,47 @@ function showLb(){
   $('lb').innerHTML=
     '<div class="lb-top"><div class="t"><b>'+esc(m.name)+'</b><small>'+(f?esc(f.name):'Unsorted')+'  |  '+fmtSize(m.size)+'  |  '+fmtDate(m.added)+'</small></div>'+
     '<button data-l="fav" class="'+(m.fav?'on':'')+'" aria-label="Favorite">'+ic('heart')+'</button>'+
+    '<button data-l="rename" aria-label="Rename">'+ic('edit')+'</button>'+
     '<button data-l="move" aria-label="Move">'+ic('move')+'</button>'+
     '<button data-l="dl" aria-label="Download">'+ic('download')+'</button>'+
     '<button data-l="del" aria-label="Delete">'+ic('trash')+'</button>'+
     '<button data-l="close" aria-label="Close">'+ic('x')+'</button></div>'+
     '<div class="lb-stage">'+(lbList.length>1?'<button class="lb-nav l" data-l="prev" aria-label="Previous">'+ic('chevL')+'</button><button class="lb-nav r" data-l="next" aria-label="Next">'+ic('chevR')+'</button>':'')+
-    (isImg(m)?'<img src="'+urlFor(m)+'" alt="'+esc(m.name)+'">':'<video src="'+urlFor(m)+'" controls autoplay playsinline></video>')+'</div>';
+    (isImg(m)?'<img src="'+urlFor(m)+'" alt="'+esc(m.name)+'">':'<div class="video-viewer" id="videoView"><video src="'+urlFor(m)+'" controls controlslist="nofullscreen" autoplay playsinline></video><button class="video-fullscreen" data-l="fullscreen">Full screen</button></div>')+'</div>';
 }
+document.addEventListener('fullscreenchange',function(){
+  var backButton=document.querySelector('[data-l="fullscreen"]');
+  if(backButton) backButton.textContent=document.fullscreenElement?'Back to vault':'Full screen';
+});
 function lbStep(d){if(lbList.length<2)return;lbIdx=(lbIdx+d+lbList.length)%lbList.length;showLb()}
 $('lb').addEventListener('click',async function(e){
   var b=e.target.closest('[data-l]'); var m=lbList[lbIdx];
   if(!b){ if(e.target.classList.contains('lb-stage')) closeLb(); return }
   var k=b.dataset.l;
   if(k==='close') closeLb();
+  else if(k==='fullscreen'){
+    var videoView=$('videoView');
+    if(document.fullscreenElement===videoView){
+      await document.exitFullscreen();
+      closeLb();
+    }else if(videoView&&videoView.requestFullscreen){
+      try{await videoView.requestFullscreen()}
+      catch(error){toast('Could not open full screen: '+error.message)}
+    }else{
+      toast('Full screen video is not supported in this browser.');
+    }
+  }
   else if(k==='prev') lbStep(-1);
   else if(k==='next') lbStep(1);
   else if(k==='fav'){toggleFav(m.id);showLb()}
+  else if(k==='rename'){
+    var renamed=await renameMedia(m.id);
+    if(renamed){
+      lbList=visible();
+      lbIdx=lbList.findIndex(function(item){return item.id===m.id});
+      if(lbIdx>-1) showLb(); else closeLb();
+    }
+  }
   else if(k==='dl') download(m.id);
   else if(k==='move'){var fid=await pickFolder();if(fid!==undefined){moveItems([m.id],fid);lbList=visible();lbIdx=Math.min(lbIdx,lbList.length-1);lbList.length?showLb():closeLb()}}
   else if(k==='del'){

@@ -86,7 +86,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </span>
-          <span class="field-error" data-error="password">Password must be at least 8 characters.</span>
+          <span class="field-error" data-error="password">At least 8 characters, with a letter and a number.</span>
         </label>
         <label class="signup-only" for="confirmPassword">Confirm password
           <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat your password" />
@@ -114,6 +114,7 @@
       </button>
       <p class="mode-switch"><span id="switchPrompt">New to Vaultly?</span> <button type="button" id="switchMode">Create an account</button></p>
       <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
+      <button type="button" id="resendConfirm" class="linkbtn text-link" style="display:block;margin:10px auto 0" hidden>Resend confirmation email</button>
     </section>
   </main>
   <script src="auth.js"></script>
