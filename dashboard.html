@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vaultly | My vault</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("vaultly-theme")==="dark"?"dark":"light"}catch(error){}</script>
+<script>try{if(sessionStorage.getItem("vaultly-dashboard-splash")==="1"){document.documentElement.classList.add("show-dashboard-splash");sessionStorage.removeItem("vaultly-dashboard-splash")}}catch(error){}</script>
 <link rel="icon" type="image/png" href="vaultly-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,6 +69,13 @@
   .sec button{border:0;background:none;cursor:pointer;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:var(--brown-soft)}
   .sec button:hover{background:var(--cream-2);color:var(--brown)}
   .side-foot{margin-top:auto;display:grid;gap:14px}
+  .profile{display:flex;align-items:center;gap:11px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:15px;background:var(--paper)}
+  .profile-avatar{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:12px;background:var(--sage);color:#fffaf0;font-size:16px;font-weight:600;text-transform:uppercase}
+  .profile-info{display:grid;gap:2px;min-width:0}
+  .profile-info small{color:var(--brown-soft);font-size:11px}
+  .profile-info strong,.profile-info span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .profile-info strong{font-size:14px;font-weight:600}
+  .profile-info span{color:var(--brown-soft);font-size:12px}
   .meter{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px}
   .meter b{font-size:14px;font-weight:600}
   .meter small{display:block;color:var(--brown-soft);font-size:13px;margin-top:2px}
@@ -209,14 +217,16 @@
   .pick .n{margin-left:auto;font-family:'DM Mono',monospace;font-size:12px;color:var(--brown-soft)}
 
   /* lightbox */
-  .lb{position:fixed;inset:0;z-index:70;background:rgba(32,22,16,.94);display:none;flex-direction:column}
+  .lb{position:fixed;inset:0;z-index:70;background:rgba(32,22,16,.94);display:none;flex-direction:column;color:#f5eedc}
   .lb.show{display:flex}
-  .lb-top{display:flex;align-items:center;gap:12px;padding:16px 22px;color:var(--cream)}
+  .lb-top{display:flex;align-items:center;gap:12px;padding:16px 22px;color:#f5eedc}
   .lb-top .t{min-width:0;flex:1}
   .lb-top b{display:block;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lb-top small{color:rgba(245,238,220,.65);font-size:13px}
-  .lb button{border:0;background:rgba(245,238,220,.12);color:var(--cream);width:42px;height:42px;border-radius:13px;cursor:pointer;display:grid;place-items:center;flex:none}
+  .lb-actions{display:flex;align-items:center;gap:10px}
+  .lb button{border:1px solid rgba(245,238,220,.24);background:rgba(245,238,220,.14);color:#f5eedc;width:42px;height:42px;border-radius:13px;cursor:pointer;display:grid;place-items:center;flex:none}
   .lb button:hover{background:rgba(245,238,220,.24)}
+  .lb button:focus-visible{outline:2px solid #dce8cb;outline-offset:2px}
   .lb button.on .ic{fill:#E39A7B;color:#E39A7B}
   .lb-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 70px 28px;position:relative}
   .lb-stage img,.lb-stage video{max-width:100%;max-height:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);background:#000}
@@ -248,17 +258,28 @@
     .lb-nav{display:none!important}
   }
   @media (max-width:520px){
+    .lb-top{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:12px}
+    .lb-top .t{width:100%}
+    .lb-top b{white-space:normal;overflow-wrap:anywhere;line-height:1.3}
+    .lb-actions{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;width:100%}
+    .lb-actions button{width:100%;height:44px;border-radius:12px}
+  }
+  @media (max-width:520px){
     .main{padding:16px 14px 72px}
     .eyebrow{gap:0}
     .eyebrow > i,#eyebrowText,.mobile-back{display:none}
     .mobile-note{display:block;margin-left:auto;color:var(--brown-soft);font-size:13px;font-weight:500;letter-spacing:0;text-transform:none}
     .head{gap:14px;margin:14px 0 18px}
     .head h1{font-size:clamp(34px,10vw,44px)}
-    .tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
-    .mobile-upload{grid-column:1/-1;width:100%}
+    .tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
     .search{grid-column:1/-1;width:100%;min-width:0}
     input.q{width:100%;min-width:0}
-    select.sort{min-width:0}
+    select.sort{grid-column:1;grid-row:2;min-width:0}
+    .seg{grid-column:2;grid-row:2;justify-self:end;align-self:stretch;width:max-content;align-items:center;background:var(--paper);border:1px solid var(--line);padding:3px}
+    .seg button{width:42px;height:42px;color:var(--brown-soft)}
+    .seg button.active{background:var(--sage);color:#fffaf0;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+    :root[data-theme="dark"] .tools .seg button.active{background:var(--sage);color:#1b201c}
+    .mobile-upload{grid-column:1/-1;grid-row:3;width:100%}
     .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
     .folders{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
     .fcard{min-width:0;padding:12px;gap:9px}
@@ -275,6 +296,14 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body class="auth-checking">
+<div class="vaultly-splash" id="dashboardSplash" role="status" aria-label="Opening your Vaultly">
+  <div class="splash-brand">
+    <img class="splash-logo" src="vaultly-logo.png" alt="">
+    <span>Vaultly</span>
+  </div>
+  <p>Opening your personal vault...</p>
+  <span class="splash-loader" aria-hidden="true"></span>
+</div>
 <div class="bg"></div>
 <div class="auth-check" role="status">Verifying your secure Vaultly session...</div>
 <div class="app" id="app">
@@ -289,6 +318,10 @@
     </div>
     <div class="side-foot">
       <div class="meter" id="meter"></div>
+      <div class="profile" id="profile">
+        <span class="profile-avatar" id="profileAvatar" aria-hidden="true">V</span>
+        <span class="profile-info"><small>Signed in as</small><strong id="profileName">Vaultly user</strong><span id="profileEmail"></span></span>
+      </div>
       <div class="private" id="privateLine"></div>
       <a class="signout" href="auth.html#signin" id="signout"></a>
     </div>
@@ -365,6 +398,18 @@ $('burger').innerHTML=ic('menu');
 $('privateLine').innerHTML=ic('lock')+'Files stay on this device';
 $('signout').innerHTML=ic('logout')+'Sign out';
 $('eyebrowText').textContent='Personal vault  |  '+new Date().toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'}).toUpperCase().replace(',',',');
+
+function renderProfile(user){
+  var metadata=user.user_metadata||{};
+  var email=user.email||'';
+  var name=String(metadata.full_name||metadata.name||'').trim();
+  if(!name&&email) name=email.split('@')[0];
+  if(!name) name='Vaultly user';
+  $('profileName').textContent=name;
+  $('profileEmail').textContent=email;
+  $('profileEmail').hidden=!email;
+  $('profileAvatar').textContent=name.charAt(0).toUpperCase();
+}
 
 /* ---------- storage (IndexedDB, in this browser) ---------- */
 var db=null, memOnly=false, currentUserId='';
@@ -510,6 +555,20 @@ function moveItems(ids,fid){
   selected.clear(); render();
   toast('Moved '+ids.length+(ids.length>1?' items':' item')+' to '+(fid?folderById(fid).name:'Unsorted'));
 }
+async function removeFromFolder(id){
+  var m=media.filter(function(x){return x.id===id})[0]; if(!m||!m.folderId) return false;
+  var oldFolderId=m.folderId;
+  m.folderId=null;
+  if(!await dbPut('media',m)){
+    m.folderId=oldFolderId;
+    toast('Could not remove this item from the folder. Please try again.');
+    return false;
+  }
+  selected.delete(id);
+  render();
+  toast('Removed from folder and moved to Unsorted');
+  return true;
+}
 async function renameMedia(id){
   var m=media.filter(function(x){return x.id===id})[0]; if(!m) return false;
   var name=await dialog({title:'Rename media',desc:'This name will appear in your vault and on downloads.',input:'File name',value:m.name,ok:'Save',maxlength:255});
@@ -584,6 +643,7 @@ function itemHTML(m){
       '<button data-act="fav" class="'+(m.fav?'on':'')+'" title="Favorite" aria-label="Favorite">'+ic('heart')+'</button>'+
       '<button data-act="rename" title="Rename" aria-label="Rename">'+ic('edit')+'</button>'+
       '<button data-act="move" title="Move to folder" aria-label="Move">'+ic('move')+'</button>'+
+      (m.folderId?'<button data-act="remove-folder" title="Remove from folder" aria-label="Remove from folder">'+ic('inbox')+'</button>':'')+
       '<button data-act="dl" title="Download" aria-label="Download">'+ic('download')+'</button>'+
       '<button data-act="del" title="Delete" aria-label="Delete">'+ic('trash')+'</button>'+
     '</div></article>';
@@ -709,6 +769,7 @@ document.addEventListener('click',async function(e){
       else if(ac==='dl') download(id);
       else if(ac==='del') deleteItems([id]);
       else if(ac==='move'){var f3=await pickFolder();if(f3!==undefined)moveItems([id],f3)}
+      else if(ac==='remove-folder') removeFromFolder(id);
       else if(ac==='sel'){selected.has(id)?selected.delete(id):selected.add(id);render()}
     } else if(selected.size){
       selected.has(id)?selected.delete(id):selected.add(id);render();
@@ -834,13 +895,14 @@ function showLb(){
   var m=lbList[lbIdx]; if(!m) return closeLb();
   var f=m.folderId?folderById(m.folderId):null;
   $('lb').innerHTML=
-    '<div class="lb-top"><div class="t"><b>'+esc(m.name)+'</b><small>'+(f?esc(f.name):'Unsorted')+'  |  '+fmtSize(m.size)+'  |  '+fmtDate(m.added)+'</small></div>'+
+    '<div class="lb-top"><div class="t"><b>'+esc(m.name)+'</b><small>'+(f?esc(f.name):'Unsorted')+'  |  '+fmtSize(m.size)+'  |  '+fmtDate(m.added)+'</small></div><div class="lb-actions">'+
     '<button data-l="fav" class="'+(m.fav?'on':'')+'" aria-label="Favorite">'+ic('heart')+'</button>'+
     '<button data-l="rename" aria-label="Rename">'+ic('edit')+'</button>'+
     '<button data-l="move" aria-label="Move">'+ic('move')+'</button>'+
+    (m.folderId?'<button data-l="remove-folder" aria-label="Remove from folder">'+ic('inbox')+'</button>':'')+
     '<button data-l="dl" aria-label="Download">'+ic('download')+'</button>'+
     '<button data-l="del" aria-label="Delete">'+ic('trash')+'</button>'+
-    '<button data-l="close" aria-label="Close">'+ic('x')+'</button></div>'+
+    '<button data-l="close" aria-label="Close">'+ic('x')+'</button></div></div>'+
     '<div class="lb-stage">'+(lbList.length>1?'<button class="lb-nav l" data-l="prev" aria-label="Previous">'+ic('chevL')+'</button><button class="lb-nav r" data-l="next" aria-label="Next">'+ic('chevR')+'</button>':'')+
     (isImg(m)?'<img src="'+urlFor(m)+'" alt="'+esc(m.name)+'">':'<div class="video-viewer" id="videoView"><video src="'+urlFor(m)+'" controls controlslist="nofullscreen" autoplay playsinline></video><button class="video-fullscreen" data-l="fullscreen">Full screen</button></div>')+'</div>';
 }
@@ -872,6 +934,14 @@ $('lb').addEventListener('click',async function(e){
   else if(k==='rename'){
     var renamed=await renameMedia(m.id);
     if(renamed){
+      lbList=visible();
+      lbIdx=lbList.findIndex(function(item){return item.id===m.id});
+      if(lbIdx>-1) showLb(); else closeLb();
+    }
+  }
+  else if(k==='remove-folder'){
+    var removed=await removeFromFolder(m.id);
+    if(removed){
       lbList=visible();
       lbIdx=lbList.findIndex(function(item){return item.id===m.id});
       if(lbIdx>-1) showLb(); else closeLb();
@@ -913,7 +983,9 @@ document.addEventListener('keydown',function(e){
     location.replace('auth.html#signin');
     return;
   }
-  currentUserId=sessionResult.data.session.user.id;
+  var user=sessionResult.data.session.user;
+  currentUserId=user.id;
+  renderProfile(user);
   document.body.classList.remove('auth-checking');
   auth.auth.onAuthStateChange(function(event,session){
     if(event==='SIGNED_OUT'||!session) location.replace('auth.html#signin');
@@ -928,6 +1000,13 @@ document.addEventListener('keydown',function(e){
   if(hash==='photos'||hash==='videos'||hash==='fav') view=hash;
   render();
   if(memOnly) toast('Private mode: files will clear when you close this tab.');
+  if(document.documentElement.classList.contains('show-dashboard-splash')){
+    var splash=document.querySelector('#dashboardSplash');
+    window.setTimeout(function(){
+      splash.classList.add('is-leaving');
+      window.setTimeout(function(){splash.remove()},500);
+    },250);
+  }
 })();
 })();
 </script>

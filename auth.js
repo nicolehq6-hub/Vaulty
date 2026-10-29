@@ -46,6 +46,11 @@
   const redirectToDashboard = () => {
     if (oauthRedirectStarted) return;
     oauthRedirectStarted = true;
+    try {
+      sessionStorage.setItem("vaultly-dashboard-splash", "1");
+    } catch (error) {
+      // Continue to the dashboard if session storage is unavailable.
+    }
     window.location.replace(dashboardUrl);
   };
 
@@ -68,7 +73,17 @@
 
   const showConfirmationNotice = (email) => {
     message.classList.add("success");
-    message.textContent = `Account created successfully! Please check ${email} for the confirmation link to activate your account. If you use Gmail, check your Gmail inbox. If you don't see the message, check your spam folder.`;
+    message.textContent = `Your account was created. Check ${email} for the confirmation email, then follow its link to activate your account. If it is not in your inbox, check your spam folder.`;
+  };
+  const showResendError = (error) => {
+    const errorMessage = error && error.message ? error.message : "";
+    const isRateLimited = error && (error.status === 429 || error.statusCode === 429) ||
+      /rate.?limit|too many|security purposes/i.test(errorMessage);
+    if (isRateLimited) {
+      showAuthError(null, "Too many confirmation emails were requested. Please wait a minute before trying again.");
+    } else {
+      showAuthError(error, "We could not resend the confirmation email. Please try again.");
+    }
   };
   const showResend = () => {
     if (resendBtn) resendBtn.hidden = false;
@@ -91,16 +106,16 @@
         const { error } = await supabase.auth.resend({
           type: "signup",
           email,
-          options: { emailRedirectTo: new URL("auth.html", window.location.href).toString() },
+          options: { emailRedirectTo: "https://vaulty-wine.vercel.app/auth.html" },
         });
         if (error) {
-          showAuthError(error, "We could not resend the email. Please try again in a minute.");
+          showResendError(error);
         } else {
           message.classList.add("success");
           message.textContent = `Confirmation email sent again to ${email}. Check your inbox and spam folder.`;
         }
       } catch (error) {
-        showAuthError(error, "We could not resend the email. Please try again in a minute.");
+        showResendError(error);
       } finally {
         setTimeout(() => { resendBtn.disabled = false; }, 60000);
       }
@@ -220,20 +235,34 @@
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fields.name.value.trim() } },
+          options: {
+            data: { full_name: fields.name.value.trim() },
+            emailRedirectTo: "https://vaulty-wine.vercel.app/auth.html",
+          },
         });
         if (error) {
           showAuthError(error, "Your account could not be created.");
         } else if (data.session) {
+          try {
+            sessionStorage.setItem("vaultly-dashboard-splash", "1");
+          } catch (error) {
+            // Continue to the dashboard if session storage is unavailable.
+          }
           window.location.assign(dashboardUrl);
         } else {
-          showAuthError(null, "Account created, but Supabase still requires email confirmation. Turn off 'Confirm email' in the dashboard.");
+          showConfirmationNotice(email);
+          showResend();
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           showAuthError(error, "We could not sign you in. Check your email and password.");
         } else if (data.session) {
+          try {
+            sessionStorage.setItem("vaultly-dashboard-splash", "1");
+          } catch (error) {
+            // Continue to the dashboard if session storage is unavailable.
+          }
           window.location.assign(dashboardUrl);
         } else {
           message.textContent = "Sign-in did not return a valid session. Please try again.";

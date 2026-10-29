@@ -21,6 +21,31 @@
 :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 .theme-toggle-dashboard { margin-left: auto; }
 
+.vaultly-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 24px;
+  color: #3b2a20;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(221, 229, 210, .9), transparent 52%),
+    #f5eedc;
+  opacity: 1;
+  transition: opacity .45s ease, visibility .45s ease;
+}
+.vaultly-splash.is-leaving { opacity: 0; visibility: hidden; pointer-events: none; }
+.splash-brand { display: flex; align-items: center; gap: 14px; font: 600 30px "Barlow", system-ui, sans-serif; letter-spacing: -.03em; }
+.splash-logo { width: 58px; height: 58px; object-fit: cover; border-radius: 18px; box-shadow: 0 10px 24px rgba(59, 42, 32, .16); }
+.vaultly-splash p { color: #6b5648; font: 500 15px "Barlow", system-ui, sans-serif; }
+.splash-loader { width: 30px; height: 30px; border: 2px solid rgba(106, 129, 96, .24); border-top-color: #6a8160; border-radius: 50%; animation: vaultly-spin .8s linear infinite; }
+@keyframes vaultly-spin { to { transform: rotate(360deg); } }
+#dashboardSplash { display: none; }
+html.show-dashboard-splash #dashboardSplash { display: grid; }
+
 /* Landing page */
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -169,6 +194,14 @@
   --danger: #e58b7d;
   --shadow: 0 10px 30px rgba(0, 0, 0, .22);
 }
+:root[data-theme="dark"] .vaultly-splash {
+  color: #f0ecdf;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(65, 79, 62, .78), transparent 52%),
+    #191d19;
+}
+:root[data-theme="dark"] .vaultly-splash p { color: #c0c0b1; }
+:root[data-theme="dark"] .splash-loader { border-color: rgba(182, 200, 169, .24); border-top-color: #b6c8a9; }
 :root[data-theme="dark"] .bg {
   background:
     radial-gradient(900px 600px at 90% 0%, #3c4034 0%, transparent 60%),
@@ -223,4 +256,8 @@
 }
 @media (max-width: 360px) {
   header.nav { padding-inline: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-loader { animation-duration: 2s; }
+  .vaultly-splash { transition-duration: .15s; }
 }

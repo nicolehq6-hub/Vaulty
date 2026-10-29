@@ -14,6 +14,14 @@
   <link rel="stylesheet" href="theme.css" />
 </head>
 <body>
+  <div class="vaultly-splash" id="landingSplash" role="status" aria-label="Loading Vaultly">
+    <div class="splash-brand">
+      <img class="splash-logo" src="vaultly-logo.png" alt="" />
+      <span>Vaultly</span>
+    </div>
+    <p>Your memories, kept close.</p>
+    <span class="splash-loader" aria-hidden="true"></span>
+  </div>
   <div class="video-backdrop" id="videoBackdrop" aria-hidden="true">
     <video class="background-video" src="Selfie.mp4" autoplay muted loop playsinline></video>
     <div class="video-shade"></div>
@@ -296,5 +304,15 @@
 
   <script src="theme.js"></script>
   <script src="script.js"></script>
+  <script>
+    (function () {
+      var splash = document.querySelector("#landingSplash");
+      var delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 250 : 1000;
+      window.setTimeout(function () {
+        splash.classList.add("is-leaving");
+        window.setTimeout(function () { splash.remove(); }, 500);
+      }, delay);
+    })();
+  </script>
 </body>
 </html>

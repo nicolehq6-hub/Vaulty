@@ -447,8 +447,9 @@ blockquote footer { display: flex; align-items: center; gap: 12px; color: var(--
 }
 @media (max-width: 560px) {
   .nav-actions { order: 1; margin-right: auto; }
-  .nav-actions .burger { order: 0; }
-  .nav-actions .btn-primary { order: 1; }
+  .nav-actions .theme-toggle { order: 0; }
+  .nav-actions .burger { order: 1; }
+  .nav-actions .btn-primary { order: 2; }
   .brand { order: 2; margin-left: auto; }
   .stats { grid-template-columns: 1fr; }
   .collections, .bento { grid-template-columns: 1fr; }
