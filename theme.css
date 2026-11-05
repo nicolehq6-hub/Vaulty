@@ -65,9 +65,24 @@ html.show-dashboard-splash #dashboardSplash { display: grid; }
   --sage-light: #354034;
 }
 :root[data-theme="dark"] body { background: var(--bg); color: var(--text); }
-:root[data-theme="dark"] .video-shade { background: rgba(18, 22, 18, .72); }
+:root[data-theme="dark"] .video-shade { background: rgba(18, 22, 18, .58); }
+:root[data-theme="dark"] .orb {
+  filter: blur(82px) saturate(1.45);
+  animation-name: drift1, landing-orb-glow;
+  animation-duration: 18s, 7s;
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-direction: alternate, alternate;
+}
+:root[data-theme="dark"] .orb-1 { background: #91b47b; opacity: .48; }
+:root[data-theme="dark"] .orb-2 { background: #6f9d83; opacity: .4; animation-name: drift2, landing-orb-glow; animation-duration: 22s, 8s; }
+:root[data-theme="dark"] .orb-3 { background: #c19a70; opacity: .34; animation-name: drift1, landing-orb-glow; animation-duration: 26s, 9s; animation-direction: alternate-reverse, alternate; }
+:root[data-theme="dark"] #particles { filter: brightness(1.65) saturate(1.2); }
+:root[data-theme="dark"] .cursor-glow {
+  background: radial-gradient(circle, rgba(158, 197, 130, .34), transparent 68%);
+}
 :root[data-theme="dark"] .hero-copy::before {
-  background: radial-gradient(ellipse at 38% 50%, rgba(25, 29, 25, .92), rgba(25, 29, 25, .7) 58%, transparent 82%);
+  background: radial-gradient(ellipse at 38% 50%, rgba(25, 29, 25, .86), rgba(25, 29, 25, .58) 58%, transparent 82%);
 }
 :root[data-theme="dark"] .nav.scrolled {
   background: rgba(25, 29, 25, .92);
@@ -92,6 +107,11 @@ html.show-dashboard-splash #dashboardSplash { display: grid; }
 :root[data-theme="dark"] .switch i { background: #f0ecdf; }
 :root[data-theme="dark"] .nav .btn-ghost { color: var(--text); }
 :root[data-theme="dark"] .nav .btn-dark { background: var(--surface-2); }
+
+@keyframes landing-orb-glow {
+  from { filter: blur(82px) saturate(1.25) brightness(.9); }
+  to { filter: blur(72px) saturate(1.65) brightness(1.2); }
+}
 
 @keyframes landing-dark-shine {
   0%, 62% { transform: translateX(-160%) rotate(18deg); opacity: 0; }

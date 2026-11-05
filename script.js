@@ -14,20 +14,11 @@
   /* ---------- Scroll progress + nav state ---------- */
   const progress = $("#scrollProgress");
   const nav = $("#nav");
-  const videoRegionEnd = $("#collections");
-  const updateVideoBackdrop = () => {
-    const regionEnd = Math.max(0, videoRegionEnd.getBoundingClientRect().top);
-    const visibleHeight = Math.min(innerHeight, regionEnd);
-    document.body.style.setProperty("--video-visible-height", `${visibleHeight}px`);
-    document.body.style.setProperty("--video-fade-start", `${Math.max(0, regionEnd - 280)}px`);
-    document.body.style.setProperty("--video-fade-end", `${regionEnd}px`);
-  };
   const onScroll = () => {
     const h = document.documentElement;
     const max = h.scrollHeight - h.clientHeight;
     progress.style.transform = `scaleX(${max > 0 ? h.scrollTop / max : 0})`;
     nav.classList.toggle("scrolled", h.scrollTop > 20);
-    updateVideoBackdrop();
   };
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
@@ -190,7 +181,7 @@
     canvas.style.width = innerWidth + "px";
     canvas.style.height = innerHeight + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const count = Math.min(70, Math.floor((innerWidth * innerHeight) / 20000));
+    const count = Math.min(90, Math.floor((innerWidth * innerHeight) / 16000));
     dots = Array.from({ length: count }, () => ({
       x: Math.random() * innerWidth,
       y: Math.random() * innerHeight,
@@ -205,6 +196,13 @@
 
   const draw = () => {
     ctx.clearRect(0, 0, innerWidth, innerHeight);
+    const darkTheme = document.documentElement.dataset.theme === "dark";
+    const particleColor = darkTheme ? "rgba(190,218,162,0.78)" : "rgba(104,123,93,0.45)";
+    const connectionDistance = darkTheme ? 145 : 120;
+    const connectionOpacity = darkTheme ? 0.3 : 0.18;
+    const connectionColor = darkTheme ? "190,218,162" : "104,123,93";
+    const cursorColor = darkTheme ? "190,218,162" : "117,139,112";
+    const cursorOpacity = darkTheme ? 0.55 : 0.35;
     for (let i = 0; i < dots.length; i++) {
       const p = dots[i];
       p.x += p.vx; p.y += p.vy;
@@ -212,19 +210,19 @@
       if (p.y < 0 || p.y > innerHeight) p.vy *= -1;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(104,123,93,0.45)";
+      ctx.fillStyle = particleColor;
       ctx.fill();
       for (let j = i + 1; j < dots.length; j++) {
         const q = dots[j];
         const d = Math.hypot(p.x - q.x, p.y - q.y);
-        if (d < 120) {
-          ctx.strokeStyle = `rgba(104,123,93,${(1 - d / 120) * 0.18})`;
+        if (d < connectionDistance) {
+          ctx.strokeStyle = `rgba(${connectionColor},${(1 - d / connectionDistance) * connectionOpacity})`;
           ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
         }
       }
       const md = Math.hypot(p.x - mouse.x, p.y - mouse.y);
       if (md < 160) {
-        ctx.strokeStyle = `rgba(117,139,112,${(1 - md / 160) * 0.35})`;
+        ctx.strokeStyle = `rgba(${cursorColor},${(1 - md / 160) * cursorOpacity})`;
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
       }
     }

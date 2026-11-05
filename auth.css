@@ -129,6 +129,7 @@ a { color: inherit; }
 .text-link { padding: 0; color: var(--sage-dark); background: none; border: 0; font-weight: 600; text-decoration: none; cursor: pointer; }
 .text-link:hover { text-decoration: underline; }
 .terms-error { margin-top: -8px; }
+.device-only-note { color: var(--brown-soft); font-size: 12px; line-height: 1.5; }
 .submit-button, .google-button {
   display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 50px;
   border-radius: 13px; cursor: pointer; font-weight: 600; transition: background .2s, transform .2s;

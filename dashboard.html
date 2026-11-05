@@ -340,8 +340,7 @@
 <div class="lb" id="lb"></div>
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+<script src="local-auth.js"></script>
 <script src="theme.js"></script>
 <script>
 (function(){
@@ -703,11 +702,8 @@ $('uploadBtn').onclick=function(){$('file').click()};
 $('file').onchange=function(e){addFiles(e.target.files,currentFolderId());e.target.value=''};
 $('signout').addEventListener('click',async function(e){
   e.preventDefault();
-  var auth=window.vaultlySupabase;
-  if(!auth){location.replace('auth.html#signin');return}
   try{
-    var result=await auth.auth.signOut();
-    if(result.error){toast('Sign out failed: '+result.error.message);return}
+    window.vaultlyLocalAuth.signOut();
     location.replace('auth.html#signin');
   }catch(error){toast('Sign out failed: '+error.message)}
 });
@@ -965,30 +961,26 @@ document.addEventListener('keydown',function(e){
 
 /* ---------- boot ---------- */
 (async function init(){
-  var auth=window.vaultlySupabase;
-  if(!auth){location.replace('auth.html#signin');return}
-  var sessionResult;
+  var auth=window.vaultlyLocalAuth;
+  if(!auth){document.querySelector('.auth-check').textContent='Local account support could not load. Reload Vaultly and try again.';return}
+  var session;
   try{
-    sessionResult=await auth.auth.getSession()
+    session=auth.getSession()
   }
   catch(error){
-    document.querySelector('.auth-check').textContent='Could not verify your Vaultly session: '+error.message;
+    document.querySelector('.auth-check').textContent='Could not verify your local Vaultly sign-in: '+error.message;
     return;
   }
-  if(sessionResult.error){
-    document.querySelector('.auth-check').textContent='Could not verify your Vaultly session: '+sessionResult.error.message;
-    return;
-  }
-  if(!sessionResult.data.session){
+  if(!session){
     location.replace('auth.html#signin');
     return;
   }
-  var user=sessionResult.data.session.user;
+  var user=session.user;
   currentUserId=user.id;
   renderProfile(user);
   document.body.classList.remove('auth-checking');
-  auth.auth.onAuthStateChange(function(event,session){
-    if(event==='SIGNED_OUT'||!session) location.replace('auth.html#signin');
+  window.addEventListener('storage',function(event){
+    if(event.key==='vaultly-local-session'&&!event.newValue) location.replace('auth.html#signin');
   });
   await openDB();
   folders=await dbAll('folders'); media=await dbAll('media');

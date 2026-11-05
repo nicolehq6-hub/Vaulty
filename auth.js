@@ -3,8 +3,7 @@
   const tabs = document.querySelector("#modeTabs");
   const form = document.querySelector("#authForm");
   const message = document.querySelector("#authMessage");
-  const resendBtn = document.querySelector("#resendConfirm");
-  const supabase = window.vaultlySupabase;
+  const localAuth = window.vaultlyLocalAuth;
   const fields = {
     name: document.querySelector("#fullName"),
     email: document.querySelector("#email"),
@@ -16,9 +15,9 @@
     signin: {
       headline: "Welcome",
       headlineAccent: "back home.",
-      lead: "Sign in to open the photos and videos you keep close. Everything stays private by default.",
+      lead: "Sign in to open the photos and videos saved in this browser on this device.",
       title: "Sign in",
-      subtitle: "Good to see you again.",
+      subtitle: "Your local vault is ready when you are.",
       submit: "Sign in",
       prompt: "New to Vaultly?",
       switch: "Create an account",
@@ -27,29 +26,26 @@
     signup: {
       headline: "Start your",
       headlineAccent: "vault today.",
-      lead: "Create a calm home for the photos and videos you want to keep close. It only takes a minute.",
+      lead: "Create a calm, private home for your photos and videos on this device.",
       title: "Create account",
-      subtitle: "Set up your personal vault.",
+      subtitle: "Set up your personal vault on this device.",
       submit: "Create account",
       prompt: "Already have an account?",
       switch: "Sign in",
       pageTitle: "Vaultly | Create account",
     },
   };
-  let mode = "signin";
-
   const dashboardUrl = new URL("dashboard.html", window.location.href).toString();
-  const googleCallbackUrl = new URL("auth.html?oauth=google", window.location.href).toString();
-  const isGoogleCallback = new URLSearchParams(window.location.search).get("oauth") === "google";
-  let oauthRedirectStarted = false;
+  let mode = "signin";
+  let redirectStarted = false;
 
   const redirectToDashboard = () => {
-    if (oauthRedirectStarted) return;
-    oauthRedirectStarted = true;
+    if (redirectStarted) return;
+    redirectStarted = true;
     try {
       sessionStorage.setItem("vaultly-dashboard-splash", "1");
     } catch (error) {
-      // Continue to the dashboard if session storage is unavailable.
+      // The dashboard works without the optional splash preference.
     }
     window.location.replace(dashboardUrl);
   };
@@ -62,65 +58,13 @@
     tabs.querySelectorAll("button").forEach((control) => {
       control.disabled = busy;
     });
-    document.querySelector("#googleSignIn").disabled = busy;
     document.querySelector("#switchMode").disabled = busy;
   };
 
-  const showAuthError = (error, fallback) => {
+  const showErrorMessage = (error, fallback) => {
     message.classList.remove("success");
     message.textContent = error && error.message ? error.message : fallback;
   };
-
-  const showConfirmationNotice = (email) => {
-    message.classList.add("success");
-    message.textContent = `Your account was created. Check ${email} for the confirmation email, then follow its link to activate your account. If it is not in your inbox, check your spam folder.`;
-  };
-  const showResendError = (error) => {
-    const errorMessage = error && error.message ? error.message : "";
-    const isRateLimited = error && (error.status === 429 || error.statusCode === 429) ||
-      /rate.?limit|too many|security purposes/i.test(errorMessage);
-    if (isRateLimited) {
-      showAuthError(null, "Too many confirmation emails were requested. Please wait a minute before trying again.");
-    } else {
-      showAuthError(error, "We could not resend the confirmation email. Please try again.");
-    }
-  };
-  const showResend = () => {
-    if (resendBtn) resendBtn.hidden = false;
-  };
-
-  if (resendBtn) {
-    resendBtn.addEventListener("click", async () => {
-      const email = fields.email.value.trim();
-      if (!email || !fields.email.validity.valid) {
-        message.classList.remove("success");
-        message.textContent = "Enter your email address first.";
-        return;
-      }
-      if (!supabase) {
-        showAuthError(null, window.vaultlySupabaseError || "Authentication is not configured.");
-        return;
-      }
-      resendBtn.disabled = true;
-      try {
-        const { error } = await supabase.auth.resend({
-          type: "signup",
-          email,
-          options: { emailRedirectTo: "https://vaulty-wine.vercel.app/auth.html" },
-        });
-        if (error) {
-          showResendError(error);
-        } else {
-          message.classList.add("success");
-          message.textContent = `Confirmation email sent again to ${email}. Check your inbox and spam folder.`;
-        }
-      } catch (error) {
-        showResendError(error);
-      } finally {
-        setTimeout(() => { resendBtn.disabled = false; }, 60000);
-      }
-    });
-  }
 
   const clearErrors = () => {
     document.querySelectorAll(".field-error.show").forEach((error) => error.classList.remove("show"));
@@ -153,7 +97,6 @@
     document.querySelector("#switchPrompt").textContent = content.prompt;
     document.querySelector("#switchMode").textContent = content.switch;
     fields.password.autocomplete = mode === "signup" ? "new-password" : "current-password";
-    if (resendBtn) resendBtn.hidden = true;
     document.title = content.pageTitle;
     message.textContent = "";
     message.classList.remove("success");
@@ -173,103 +116,47 @@
     fields.confirmPassword.type = show ? "text" : "password";
     event.currentTarget.setAttribute("aria-label", show ? "Hide password" : "Show password");
   });
-  document.querySelector("#forgotPassword").addEventListener("click", () => {
-    const url = new URL("forgot-password.html", window.location.href);
-    if (fields.email.value.trim()) url.searchParams.set("email", fields.email.value.trim());
-    window.location.assign(url);
-  });
-  document.querySelector("#googleSignIn").addEventListener("click", async () => {
-    if (!supabase) {
-      message.textContent = window.vaultlySupabaseError || "Authentication is not configured.";
-      return;
-    }
-    if (window.location.protocol === "file:") {
-      message.textContent = "Google sign-in requires a local web server. Open Vaultly at an http://localhost or http://127.0.0.1 address, then try again.";
-      return;
-    }
-
-    message.textContent = "Connecting to Google...";
-    document.querySelector("#googleSignIn").disabled = true;
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: googleCallbackUrl },
-      });
-      if (error) showAuthError(error, "Google sign-in could not be started.");
-    } catch (error) {
-      showAuthError(error, "We could not reach Google sign-in. Check your connection and try again.");
-    } finally {
-      document.querySelector("#googleSignIn").disabled = false;
-    }
-  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     message.textContent = "";
     message.classList.remove("success");
     clearErrors();
+
     let invalid = false;
     if (mode === "signup") invalid = showError("name", !fields.name.value.trim()) || invalid;
     invalid = showError("email", !fields.email.validity.valid || !fields.email.value.trim()) || invalid;
-    invalid = showError("password", fields.password.value.length < (mode === "signup" ? 8 : 1)) || invalid;
+    const password = fields.password.value;
+    const weakPassword = mode === "signup"
+      ? password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)
+      : password.length < 1;
+    invalid = showError("password", weakPassword) || invalid;
     if (mode === "signup") {
-      invalid = showError("confirmPassword", fields.confirmPassword.value !== fields.password.value) || invalid;
+      invalid = showError("confirmPassword", fields.confirmPassword.value !== password) || invalid;
       invalid = showError("terms", !fields.terms.checked) || invalid;
     }
     if (invalid) {
       message.textContent = "Please correct the highlighted fields.";
       return;
     }
-
-    if (!supabase) {
-      message.textContent = window.vaultlySupabaseError || "Authentication is not configured.";
+    if (!localAuth) {
+      showErrorMessage(null, "Local accounts could not be loaded. Reload Vaultly and try again.");
       return;
     }
 
     setBusy(true);
     try {
       const email = fields.email.value.trim();
-      const password = fields.password.value;
-
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fields.name.value.trim() },
-            emailRedirectTo: "https://vaulty-wine.vercel.app/auth.html",
-          },
-        });
-        if (error) {
-          showAuthError(error, "Your account could not be created.");
-        } else if (data.session) {
-          try {
-            sessionStorage.setItem("vaultly-dashboard-splash", "1");
-          } catch (error) {
-            // Continue to the dashboard if session storage is unavailable.
-          }
-          window.location.assign(dashboardUrl);
-        } else {
-          showConfirmationNotice(email);
-          showResend();
-        }
+        await localAuth.register(email, password, fields.name.value.trim());
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          showAuthError(error, "We could not sign you in. Check your email and password.");
-        } else if (data.session) {
-          try {
-            sessionStorage.setItem("vaultly-dashboard-splash", "1");
-          } catch (error) {
-            // Continue to the dashboard if session storage is unavailable.
-          }
-          window.location.assign(dashboardUrl);
-        } else {
-          message.textContent = "Sign-in did not return a valid session. Please try again.";
-        }
+        await localAuth.signIn(email, password);
       }
+      redirectToDashboard();
     } catch (error) {
-      showAuthError(error, "We could not reach the authentication service. Check your connection and try again.");
+      showErrorMessage(error, mode === "signup"
+        ? "Your local account could not be created. Please try again."
+        : "We could not sign you in. Check your email and password.");
     } finally {
       setBusy(false);
     }
@@ -277,33 +164,13 @@
 
   setMode(location.hash === "#signup" ? "signup" : "signin", false);
 
-  if (!supabase) {
-    message.textContent = window.vaultlySupabaseError || "Authentication is not configured.";
-  } else {
-    if (isGoogleCallback) {
-      setBusy(true);
-      message.textContent = "Finishing Google sign-in...";
-      supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_IN" && session) redirectToDashboard();
-      });
-    }
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (error) {
-        showAuthError(error, "We could not verify your sign-in session.");
-      } else if (data.session) {
-        redirectToDashboard();
-      } else if (isGoogleCallback) {
-        const callbackParams = new URLSearchParams(window.location.search);
-        const callbackError = callbackParams.get("error_description") || callbackParams.get("error");
-        showAuthError(
-          callbackError ? new Error(callbackError.replace(/\+/g, " ")) : null,
-          "Google sign-in did not return a session. Please try again."
-        );
-      }
-    }).catch((error) => {
-      showAuthError(error, "We could not reach the authentication service. Check your connection and try again.");
-    }).finally(() => {
-      if (isGoogleCallback) setBusy(false);
-    });
+  if (!localAuth) {
+    showErrorMessage(null, "Local accounts could not be loaded. Reload Vaultly and try again.");
+    return;
+  }
+  try {
+    if (localAuth.getSession()) redirectToDashboard();
+  } catch (error) {
+    showErrorMessage(error, "We could not verify your saved sign-in.");
   }
 })();
